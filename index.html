@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<link rel="shortcut icon" href="fanx.ico" type="image/x-icon">
+<link rel="icon" href="fanx.ico" type="image/x-icon">
+<meta charset="UTF-8">
+<title>繁星SL服务器管理员日志文件解析器</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+  }
+  .container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  h1 {
+    color: #333;
+  }
+  .btn {
+    margin-top: 10px;
+  }
+  table {
+    margin-top: 20px;
+  }
+  th, td {
+    text-align: center;
+  }
+  th {
+    background-color: #007bff;
+    color: white;
+  }
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  #searchBox {
+    margin-top: 20px;
+  }
+  .searchHelp {
+    margin-top: 10px;
+  }
+  #searchHelpText {
+    border: 1px solid #ddd;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1 class="text-center">繁星SL服务器管理员日志文件解析器</h1>
+  <div class="text-center">
+    <input type="file" class="btn btn-light" id="fileInput" accept=".txt" style="border: 1px solid #ccc;">
+    <button class="btn btn-primary" onclick="parseLogFile()">解析日志</button>
+    <button class="btn btn-success" id="exportBtn" onclick="exportToExcel()">导出Excel</button>
+  </div>
+  <div id="searchBox" class="text-center" style="display:none;">
+    <input type="text" class="form-control" id="searchInput" placeholder="搜索用户名、时间、SteamID或事件">
+    <button class="btn btn-secondary" onclick="searchTable()">搜索</button>
+  </div>
+  <div class="searchHelp text-center">
+    <button class="btn btn-link" onclick="showSearchHelp()">搜索规范</button>
+    <div id="searchHelpText" style="display:none;">
+      <p><strong>搜索示例：</strong><br>
+      假设您想要搜索用户名为“雪球”的记录，他们可以在搜索框中输入“雪球”，然后点击搜索按钮。搜索结果会显示所有用户名为“雪球”的数据。</p>
+      
+      <p><strong>搜索特定时间：</strong><br>
+      如果想要搜索特定时间的记录，时间的格式是“17/12/2024”也就是日/月/年</p>
+      
+      <p><strong>注意事项：</strong><br>
+      搜索不区分大小写。<br>
+      搜索是基于文本匹配的，如果搜索词是多个单词，它会在任何包含这些单词的文本中找到匹配项。<br>
+      如果搜索词太短或太常见，可能会返回大量结果。在这种情况下，尝试使用更具体的关键词可能会得到更好的结果。</p>
+    </div>
+  </div>
+  <table class="table" id="logTable" style="display:none;">
+    <thead>
+      <tr>
+        <th class="text-center">时间</th>
+        <th class="text-center">用户名</th>
+        <th class="text-center">SteamID</th>
+        <th class="text-center">事件</th>
+      </tr>
+    </thead>
+    <tbody>
+    <!-- 日志数据将被动态插入这里 -->
+    </tbody>
+  </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> 
+<script>
+let lastDownloadTime = 0; // 记录最后一次下载的时间
+
+function parseLogFile() {
+  const fileInput = document.getElementById('fileInput');
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+  
+  reader.onload = function(e) {
+    const content = e.target.result;
+    const lines = content.split('\n');
+    const tableBody = document.getElementById('logTable').getElementsByTagName('tbody')[0];
+    tableBody.innerHTML = ''; // 清空表格
+    
+    lines.forEach(line => {
+      if (line) {
+        const parts = line.match(/\[(.*?)\] (.*?) \((.*?)@steam\) (.*)/);
+        if (parts && parts.length === 5) {
+          const time = parts[1];
+          const username = parts[2];
+          const steamId = parts[3]; // 保留SteamID，但不包括@steam
+          const event = parts[4].split('command ')[1] || ''; // 提取command后面的内容作为事件
+        
+          const row = tableBody.insertRow();
+          const cellTime = row.insertCell(0);
+          const cellUsername = row.insertCell(1);
+          const cellSteamId = row.insertCell(2);
+          const cellEvent = row.insertCell(3);
+          
+          cellTime.textContent = time;
+          cellUsername.textContent = username;
+          cellSteamId.textContent = steamId;
+          cellEvent.textContent = event;
+        }
+      }
+    });
+    
+    document.getElementById('logTable').style.display = 'table'; // 显示表格
+    document.getElementById('searchBox').style.display = 'block'; // 显示搜索框
+  };
+  
+  if (file) {
+    reader.readAsText(file);
+  }
+}
+
+function searchTable() {
+  const input = document.getElementById('searchInput');
+  const filter = input.value.toLowerCase();
+  const table = document.getElementById('logTable');
+  const trs = table.getElementsByTagName('tr');
+
+  for (let i = 1; i < trs.length; i++) { // 跳过表头
+    const tds = trs[i].getElementsByTagName('td');
+    let found = false;
+    for (let j = 0; j < tds.length; j++) {
+      if (tds[j].textContent.toLowerCase().indexOf(filter) > -1) {
+        found = true;
+        break;
+      }
+    }
+    if (found) {
+      trs[i].style.display = '';
+    } else {
+      trs[i].style.display = 'none';
+    }
+  }
+}
+
+function showSearchHelp() {
+  const searchHelpText = document.getElementById('searchHelpText');
+  searchHelpText.style.display = searchHelpText.style.display === 'none' ? 'block' : 'none';
+}
+
+function exportToExcel() {
+  const currentTime = new Date().getTime(); // 获取当前时间
+  const timeDiff = currentTime - lastDownloadTime; // 计算时间差
+
+  // 如果时间差小于10000毫秒（10秒），则阻止下载
+  if (timeDiff < 10000) {
+    alert("请等待10秒后再尝试下载！");
+    return;
+  }
+
+  const table = document.getElementById("logTable");
+  const worksheet = XLSX.utils.table_to_book(table);
+  XLSX.writeFile(worksheet, "logData.xlsx");
+  lastDownloadTime = currentTime; // 更新最后一次下载的时间
+}
+</script>
+</body>
+</html>
