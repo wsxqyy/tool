@@ -1,5 +1,7 @@
-# tool
-This is an open-source SCP: SL (SCP: Secret Laboratory) server admin log interpreter. You can open your admin log files through the web, allowing you to quickly analyze the logs.
+# en_README.md
+   Hello! This is an English readme file, this file is a robot translation, and there are some shortcomings.
+## admin SL log
+  This is an open-source SCP: SL (SCP: Secret Laboratory) server admin log interpreter. You can open your admin log files through the web, allowing you to quickly analyze the logs.
 
 # Demo
 ## You can visit a demo website set up by Xueqiu Bqiu on GitHub for a quick experience: https://wsxqyy.github.io/tool/. After visiting the website, you will see the following:
@@ -39,5 +41,5 @@ If you want to search for records of a specific time, the time format is "17/12/
 ##### If the search term is too short or too common, it may return a large number of results. In this case, trying to use more specific keywords may yield better results.
 
 # Conclusion
-## This project was developed by SL Starry Server Tech Xueqiu Bqiu. I will upload more projects in the future. Welcome to follow me!
+## This project was developed by SL Starry Server Tech 雪球Bqiu. I will upload more projects in the future. Welcome to follow me!
 ## Please, give a star to help a 16-year-old kid!
