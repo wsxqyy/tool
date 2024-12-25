@@ -5,7 +5,7 @@
   
   ![image](https://github.com/user-attachments/assets/7458a272-5dac-4754-b4c9-a47feb29b866)
 
-## 请上传您的这个文件：xxxx-RAlog.txt   (其中，XXXX代表您的服务器的端口，比如这里我的是8000.注意，请不要上传其他的文件，比如：ServerLog-7777.txt)
+## 请上传您的这个文件：xxxx-RAlog.txt   (其中，XXXX代表您的服务器的端口，比如我的是8000.注意，请不要上传其他的文件，比如：ServerLog-7777.txt)
 
 ![image](https://github.com/user-attachments/assets/a6f4dc90-4fb1-4b04-84b8-7c5cfbbe8cf2)
 
