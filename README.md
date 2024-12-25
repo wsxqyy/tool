@@ -1,4 +1,4 @@
-#中文继续阅读 <a href="https://github.com/wsxqyy/tool/blob/main/en_README.md">English</a>
+#中文继续阅读 <a href="https://github.com/wsxqyy/tool/blob/main/en_README.md">Read through English documents</a>
 # tool
   这是一个开源的SCP：SL（SCP秘密实验室 / SCP: Secret Laboratory）服务器端的管理员日志解释器，您可以把您的管理员日志文件通过网页打开，您将可以快捷搜索管理员日志中的人、时间和事件。您可以在最后导出您搜索到的数据的文件为Ex表格。
 # 示范
