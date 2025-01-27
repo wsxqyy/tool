@@ -4,7 +4,10 @@
   This is an open-source SCP: SL (SCP: Secret Laboratory) server admin log interpreter. You can open your admin log files through the web, allowing you to quickly analyze the logs.
 
 # Demo
-## You can visit a demo website set up by Xueqiu Bqiu on GitHub for a quick experience: https://wsxqyy.github.io/tool/. After visiting the website, you will see the following:
+## You can visit a demo website set up by Xueqiu Bqiu on GitHub for a quick experience: 
+V1.0 :https://wsxqyy.github.io/tool/   
+V2.0：https://wsxqyy.github.io/tool/V2.0
+After visiting the website, you will see the following:
 
 ![image](https://github.com/user-attachments/assets/7458a272-5dac-4754-b4c9-a47feb29b866)
 
