@@ -2,7 +2,12 @@
 # tool
   这是一个开源的SCP：SL（SCP秘密实验室 / SCP: Secret Laboratory）服务器端的管理员日志解释器，您可以把您的管理员日志文件通过网页打开，您将可以快捷搜索管理员日志中的人、时间和事件。您可以在最后导出您搜索到的数据的文件为Ex表格。
 # 示范
-##  您可以来到雪球Bqiu用Github搭建的一个示范网站快速体验：https://wsxqyy.github.io/tool/    来到网站之后，您会看见这些
+##  您可以来到雪球Bqiu用Github搭建的一个示范网站快速体验：
+
+V1.0 :https://wsxqyy.github.io/tool/   
+V2.0：https://wsxqyy.github.io/tool/V2.0
+
+来到网站之后，您会看见这些
   
   ![image](https://github.com/user-attachments/assets/7458a272-5dac-4754-b4c9-a47feb29b866)
 
