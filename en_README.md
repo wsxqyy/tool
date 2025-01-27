@@ -6,7 +6,7 @@
 # Demo
 ## You can visit a demo website set up by Xueqiu Bqiu on GitHub for a quick experience: 
 V1.0 :https://wsxqyy.github.io/tool/   
-V2.0：https://wsxqyy.github.io/tool/V2.0
+V2.0：https://wsxqyy.github.io/tool/SL_V2.0/
 After visiting the website, you will see the following:
 
 ![image](https://github.com/user-attachments/assets/7458a272-5dac-4754-b4c9-a47feb29b866)
