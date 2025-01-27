@@ -5,7 +5,7 @@
 ##  您可以来到雪球Bqiu用Github搭建的一个示范网站快速体验：
 
 V1.0 :https://wsxqyy.github.io/tool/   
-V2.0：[https://wsxqyy.github.io/tool/V2.0](https://wsxqyy.github.io/tool/SL_V2.0/)
+V2.0：[V2.0](https://wsxqyy.github.io/tool/SL_V2.0/)
 
 来到网站之后，您会看见这些
   
