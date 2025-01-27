@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <link rel="shortcut icon" href="snowballtool.ico" type="image/x-icon">
+    <link rel="icon" href="snowballtool.ico" type="image/x-icon">
+    <meta charset="UTF-8">
+    <title data-i18n="title">SL服务器管理员日志文件解析器</title>
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <script src="xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+             transition: background-color 0.5s ease; /* 添加背景颜色过渡效果 */
+            overflow-x: hidden; /* 防止水平滚动 */
+        }
+        body.dark-mode {
+            background-color: #333;
+            color: #fff;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: background-color 0.5s ease, box-shadow 0.5s ease, transform 0.3s ease; /* 添加过渡效果 */
+             position: relative; /* 启用相对定位 */
+        }
+         .container.dark-mode {
+            background-color: #444;
+             box-shadow: 0 6px 12px rgba(255,255,255,0.1);
+        }
+         .container:hover {
+            transform: translateY(-5px); /* 鼠标悬停时向上移动 */
+        }
+          .container::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            transition: border-color 0.3s ease, transform 0.3s ease;
+             z-index: -1;
+        }
+
+        .container:hover::before {
+            border-color: #007bff; /* 鼠标悬停时边框颜色变化 */
+            transform: scale(1.02);
+        }
+        h1 {
+            color: #333;
+             transition: color 0.5s ease, transform 0.3s ease;
+              text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        h1.dark-mode {
+             color: #fff;
+              text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.1);
+         }
+        h1:hover {
+            transform: scale(1.03); /* 鼠标悬停时放大 */
+        }
+        .btn {
+            margin-top: 10px;
+            transition: background-color 0.5s ease, color 0.5s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+           .btn:hover {
+              transform: scale(1.05); /* 鼠标悬停时放大 */
+             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            }
+         .btn.dark-mode {
+             background-color: #6c757d;
+             color: #fff;
+             box-shadow: 0 2px 4px rgba(255,255,255,0.1);
+         }
+          .btn.dark-mode:hover {
+             box-shadow: 0 4px 8px rgba(255,255,255,0.2);
+         }
+        table {
+            margin-top: 20px;
+            border-collapse: collapse; /* Collapse borders */
+            width: 100%; /* Ensure table takes full width */
+            transition: opacity 0.5s ease;
+        }
+        table.fade-in {
+             opacity: 1;
+        }
+        table.fade-out {
+             opacity: 0;
+        }
+        th, td {
+               text-align: center;
+            padding: 10px; /* Add some padding */
+            border: 1px solid #ddd;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+             position: relative;
+        }
+        th::before {
+             content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 3px;
+            background: transparent;
+             transition: background-color 0.5s ease;
+        }
+        th:hover::before {
+              background: #fff;
+        }
+        th.dark-mode {
+             background-color: #0056b3;
+             color: #fff;
+         }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+             transition: background-color 0.5s ease;
+        }
+          tr:nth-child(even).dark-mode {
+             background-color: #555;
+         }
+          tr:hover {
+            background-color: #eaeaea; /* 鼠标悬停时颜色变化 */
+            transform: translateY(-2px);
+             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+         }
+           tr.dark-mode:hover {
+                 background-color: #666;
+                    box-shadow: 0 2px 4px rgba(255,255,255,0.1);
+          }
+        #searchBox {
+            margin-top: 20px;
+             transition: background-color 0.5s ease, transform 0.3s ease;
+             display: flex;
+             justify-content: center;
+             gap:10px;
+             align-items: center;
+        }
+         #searchBox:hover {
+              transform: translateY(-2px);
+         }
+        .searchHelp {
+            margin-top: 10px;
+        }
+        #searchHelpText {
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            transition: background-color 0.5s ease, transform 0.3s ease, opacity 0.5s ease;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+        }
+           #searchHelpText.show {
+           opacity: 1;
+            max-height: 500px; /* 设定最大高度 */
+             padding: 10px;
+         }
+         #searchHelpText.dark-mode {
+            background-color: #666;
+            color: #fff;
+            border-color: #555
+        }
+         #searchInput {
+            transition: background-color 0.5s ease, color 0.5s ease, border 0.5s ease, transform 0.3s ease;
+         }
+           #searchInput.dark-mode {
+             background-color: #555;
+             color: #fff;
+             border-color: #555;
+         }
+         .dark-mode .btn-link {
+             color: #fff;
+         }
+         .fade-in-element {
+             animation: fadeIn 0.8s ease forwards;
+          }
+        @keyframes fadeIn {
+              from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container fade-in-element">
+    <div style="display:flex; justify-content: space-between; align-items: center;">
+         <h1 class="text-center" data-i18n="title">繁星SL服务器管理员日志文件解析器（数据不会上传到服务器）</h1>
+        <button id="languageToggle" class="btn btn-secondary" >EN</button>
+    </div>
+    
+    <div class="text-center fade-in-element">
+        <input type="file" class="btn btn-light" id="fileInput" accept=".txt" style="border: 1px solid #ccc;" data-i18n="fileInput">
+        <button class="btn btn-primary" onclick="parseLogFile()" data-i18n="parseButton">解析日志</button>
+        <button class="btn btn-success" id="exportBtn" onclick="exportToExcel()" data-i18n="exportButton">导出Excel</button>
+    </div>
+    <div id="searchBox" class="text-center fade-in-element" style="display:none;">
+        <input type="text" class="form-control" id="searchInput" placeholder="搜索用户名、时间、SteamID或事件" data-i18n="searchPlaceholder">
+        <button class="btn btn-secondary" onclick="searchTable()" data-i18n="searchButton">搜索</button>
+    </div>
+    <div class="searchHelp text-center fade-in-element">
+        <button class="btn btn-link" onclick="showSearchHelp()" data-i18n="searchHelpButton">搜索规范</button>
+        <div id="searchHelpText"  data-i18n="searchHelpText">
+            <p><strong data-i18n="searchExampleTitle">搜索示例：</strong><br>
+                <span data-i18n="searchExampleText1">假设您想要搜索用户名为“雪球”的记录，他们可以在搜索框中输入“雪球”，然后点击搜索按钮。搜索结果会显示所有用户名为“雪球”的数据。</span></p>
+            
+            <p><strong data-i18n="searchTimeTitle">搜索特定时间：</strong><br>
+                <span data-i18n="searchTimeText1">如果想要搜索特定时间的记录，时间的格式是“17/12/2024”也就是日/月/年</span></p>
+            
+            <p><strong data-i18n="searchNoteTitle">注意事项：</strong><br>
+                <span data-i18n="searchNoteText1">搜索不区分大小写。</span><br>
+                <span data-i18n="searchNoteText2">搜索是基于文本匹配的，如果搜索词是多个单词，它会在任何包含这些单词的文本中找到匹配项。</span><br>
+                <span data-i18n="searchNoteText3">如果搜索词太短或太常见，可能会返回大量结果。在这种情况下，尝试使用更具体的关键词可能会得到更好的结果。</span></p>
+        </div>
+    </div>
+    <table class="table fade-out" id="logTable" style="display:none;">
+        <thead>
+        <tr>
+            <th class="text-center" data-i18n="timeHeader">时间</th>
+            <th class="text-center" data-i18n="usernameHeader">用户名</th>
+            <th class="text-center" data-i18n="steamIdHeader">SteamID</th>
+            <th class="text-center" data-i18n="eventHeader">事件</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- 日志数据将被动态插入这里 -->
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  let lastDownloadTime = 0;
+    let currentLanguage = 'zh'; // 默认中文
+    const translations = {
+        'zh': {
+            'title': '繁星SL服务器管理员日志文件解析器（数据不会上传到服务器）',
+            'fileInput': '选择日志文件',
+            'parseButton': '解析日志',
+            'exportButton': '导出Excel',
+            'searchPlaceholder': '搜索用户名、时间、SteamID或事件',
+            'searchButton': '搜索',
+            'searchHelpButton': '搜索规范',
+             'searchExampleTitle': '搜索示例：',
+            'searchExampleText1': '假设您想要搜索用户名为“雪球”的记录，他们可以在搜索框中输入“雪球”，然后点击搜索按钮。搜索结果会显示所有用户名为“雪球”的数据。',
+              'searchTimeTitle':'搜索特定时间：',
+            'searchTimeText1': '如果想要搜索特定时间的记录，时间的格式是“17/12/2024”也就是日/月/年',
+             'searchNoteTitle':'注意事项：',
+            'searchNoteText1':'搜索不区分大小写。',
+            'searchNoteText2':'搜索是基于文本匹配的，如果搜索词是多个单词，它会在任何包含这些单词的文本中找到匹配项。',
+            'searchNoteText3':'如果搜索词太短或太常见，可能会返回大量结果。在这种情况下，尝试使用更具体的关键词可能会得到更好的结果。',
+            'timeHeader': '时间',
+            'usernameHeader': '用户名',
+            'steamIdHeader': 'SteamID',
+            'eventHeader': '事件',
+            'languageToggle': 'EN'
+        },
+        'en': {
+            'title': 'SL Server Admin Log File Parser (Data will not be uploaded to the server)',
+            'fileInput': 'Select Log File',
+            'parseButton': 'Parse Log',
+            'exportButton': 'Export to Excel',
+            'searchPlaceholder': 'Search Username, Time, SteamID, or Event',
+            'searchButton': 'Search',
+            'searchHelpButton': 'Search Guide',
+               'searchExampleTitle': 'Search Example:',
+            'searchExampleText1': 'Suppose you want to search for records with the username "Snowball", they can type "Snowball" in the search box and click the search button. The search results will display all data with the username "Snowball".',
+            'searchTimeTitle':'Search Specific Time:',
+             'searchTimeText1':'If you want to search for records at a specific time, the time format is "17/12/2024" which is day/month/year',
+             'searchNoteTitle':'Notes:',
+            'searchNoteText1':'Searches are not case-sensitive.',
+            'searchNoteText2':'Searches are based on text matching, if the search term is multiple words, it will find matches in any text that contains these words.',
+            'searchNoteText3':'If the search term is too short or too common, it may return a large number of results. In this case, try using more specific keywords for better results.',
+            'timeHeader': 'Time',
+            'usernameHeader': 'Username',
+            'steamIdHeader': 'SteamID',
+            'eventHeader': 'Event',
+            'languageToggle': 'ZH'
+        }
+    };
+    
+    function applyTranslations(lang) {
+        const elements = document.querySelectorAll('[data-i18n]');
+        elements.forEach(element => {
+            const key = element.getAttribute('data-i18n');
+            if (translations[lang] && translations[lang][key]) {
+                 
+                if (element.tagName === 'INPUT') {
+                    element.placeholder = translations[lang][key];
+                }else {
+                    element.textContent = translations[lang][key];
+                }
+            }
+        });
+         document.querySelector("#languageToggle").textContent =  lang === 'zh' ? 'EN' : 'ZH'
+    }
+    
+    function setInitialLanguage() {
+        const browserLanguage = navigator.language || navigator.userLanguage;
+        currentLanguage = browserLanguage.startsWith('zh') ? 'zh' : 'en';
+        applyTranslations(currentLanguage);
+    }
+    
+    function toggleLanguage() {
+        currentLanguage = currentLanguage === 'zh' ? 'en' : 'zh';
+        applyTranslations(currentLanguage);
+    }
+    
+    document.getElementById('languageToggle').addEventListener('click', toggleLanguage);
+    setInitialLanguage();
+  
+    function parseLogFile() {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const content = e.target.result;
+            const lines = content.split('\n');
+            const table = document.getElementById('logTable');
+            const tableBody = table.getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = ''; // 清空表格
+            
+            lines.forEach(line => {
+                if (line) {
+                    const parts = line.match(/\[(.*?)\] (.*?) \((.*?)@steam\) (.*)/);
+                    if (parts && parts.length === 5) {
+                        const time = parts[1];
+                        const username = parts[2];
+                        const steamId = parts[3]; // 保留SteamID，但不包括@steam
+                        const event = parts[4].split('command ')[1] || ''; // 提取command后面的内容作为事件
+                    
+                        const row = tableBody.insertRow();
+                        const cellTime = row.insertCell(0);
+                        const cellUsername = row.insertCell(1);
+                        const cellSteamId = row.insertCell(2);
+                        const cellEvent = row.insertCell(3);
+                        
+                        cellTime.textContent = time;
+                        cellUsername.textContent = username;
+                        cellSteamId.textContent = steamId;
+                        cellEvent.textContent = event;
+                    }
+                }
+            });
+            
+              table.classList.remove('fade-out'); // 移除 fade-out 类
+                table.classList.add('fade-in');     // 添加 fade-in 类
+            table.style.display = 'table'; // 显示表格
+            document.getElementById('searchBox').style.display = 'flex'; // 显示搜索框
+        };
+        
+        if (file) {
+            reader.readAsText(file);
+        }
+    }
+    
+    function searchTable() {
+        const input = document.getElementById('searchInput');
+        const filter = input.value.toLowerCase();
+        const table = document.getElementById('logTable');
+        const trs = table.getElementsByTagName('tr');
+    
+        for (let i = 1; i < trs.length; i++) { // 跳过表头
+            const tds = trs[i].getElementsByTagName('td');
+            let found = false;
+            for (let j = 0; j < tds.length; j++) {
+                if (tds[j].textContent.toLowerCase().indexOf(filter) > -1) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
+                trs[i].style.display = '';
+            } else {
+                trs[i].style.display = 'none';
+            }
+        }
+    }
+    
+    function showSearchHelp() {
+        const searchHelpText = document.getElementById('searchHelpText');
+         searchHelpText.classList.toggle('show');
+    }
+    
+    function exportToExcel() {
+        const currentTime = new Date().getTime(); // 获取当前时间
+        const timeDiff = currentTime - lastDownloadTime; // 计算时间差
+        
+        // 如果时间差小于10000毫秒（10秒），则阻止下载
+        if (timeDiff < 10000) {
+            alert("请等待10秒后再尝试下载！");
+            return;
+        }
+        
+        const table = document.getElementById("logTable");
+        const worksheet = XLSX.utils.table_to_book(table);
+        XLSX.writeFile(worksheet, "logData.xlsx");
+        lastDownloadTime = currentTime; // 更新最后一次下载的时间
+    }
+    
+  // 添加夜间模式切换
+    let isDarkMode = false;
+    
+   function toggleDarkMode() {
+        isDarkMode = !isDarkMode;
+         const body = document.body;
+        const container = document.querySelector('.container');
+        const h1 = document.querySelector('h1');
+         const buttons = document.querySelectorAll('.btn');
+         const tableHeaders = document.querySelectorAll('th');
+         const searchHelpText = document.querySelector('#searchHelpText');
+           const tableRows = document.querySelectorAll('tr:nth-child(even)');
+          const searchInput = document.querySelector('#searchInput')
+        
+          
+        body.classList.toggle('dark-mode', isDarkMode);
+         container.classList.toggle('dark-mode', isDarkMode);
+          h1.classList.toggle('dark-mode', isDarkMode);
+        buttons.forEach(button => button.classList.toggle('dark-mode', isDarkMode));
+         tableHeaders.forEach(header => header.classList.toggle('dark-mode', isDarkMode));
+         searchHelpText.classList.toggle('dark-mode', isDarkMode);
+         tableRows.forEach(row => row.classList.toggle('dark-mode', isDarkMode));
+         searchInput.classList.toggle('dark-mode', isDarkMode);
+    
+        
+    }
+  
+      document.addEventListener('DOMContentLoaded', function() {
+     const languageToggle = document.querySelector('#languageToggle');
+        languageToggle.addEventListener('click', toggleDarkMode);
+});
+</script>
+</body>
+</html>
